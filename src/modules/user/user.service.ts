@@ -1,7 +1,9 @@
-import { Injectable } from "@nestjs/common";
+import { Inject, Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
+import { Redis } from "ioredis";
 import { Repository } from "typeorm";
 import { Transactional } from "typeorm-transactional";
+import { REDIS_CLIENT, userCacheKey, userRolesCacheKey } from "../../constants/auth.constants";
 import { UserEntity } from "../../database/entities/user.entity";
 import { AppException } from "../../exception/app.exception";
 import { ErrorCode } from "../../exception/error-messages";
@@ -15,7 +17,10 @@ import { UpdateUserBody } from "./dto/update-user-body.dto";
 
 @Injectable()
 export class UserService {
-  constructor(@InjectRepository(UserEntity) private userRepo: Repository<UserEntity>) {}
+  constructor(
+    @InjectRepository(UserEntity) private userRepo: Repository<UserEntity>,
+    @Inject(REDIS_CLIENT) private redisClient: Redis,
+  ) {}
 
   async list(authUser: IAuthUser, query: ListQuery) {
     const { keyword, take, skip } = query;
@@ -69,6 +74,8 @@ export class UserService {
     updateEntity(user, body);
 
     await this.userRepo.save(user);
+
+    await this.redisClient.del(userCacheKey(id), userRolesCacheKey(id));
   }
 
   @Transactional()
@@ -76,5 +83,7 @@ export class UserService {
     const { ids } = body;
 
     await this.userRepo.delete(ids);
+
+    await this.redisClient.del(...ids.flatMap((id) => [userCacheKey(id), userRolesCacheKey(id)]));
   }
 }
