@@ -1,7 +1,7 @@
 import { MailerService } from "@nestjs-modules/mailer";
 import { Processor, WorkerHost } from "@nestjs/bullmq";
 import { Job } from "bullmq";
-import { MAIL_QUEUE, MailJobName } from "./mail.queue.constant";
+import { MAIL_QUEUE, MailJobName } from "../../constants/mail.queue.constant";
 
 interface SendVerifyEmailData {
   email: string;

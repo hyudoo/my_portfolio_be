@@ -6,7 +6,7 @@ import { ConfigService } from "@nestjs/config";
 import { join } from "path";
 import { SMTP_FROM, SMTP_HOST, SMTP_PASSWORD, SMTP_PORT, SMTP_USER } from "../../constants/env-key.constant";
 import { MailProcessor } from "./mail.processor";
-import { MAIL_QUEUE } from "./mail.queue.constant";
+import { MAIL_QUEUE } from "../../constants/mail.queue.constant";
 import { MailService } from "./mail.service";
 
 @Module({
