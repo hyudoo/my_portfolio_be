@@ -72,6 +72,36 @@ Use `typeorm-transactional` decorators (`@Transactional()`) for service methods 
 
 `MailModule` registers a BullMQ queue backed by Redis. The `MailProcessor` consumes jobs and sends emails via Nodemailer. To send email, inject `MailService` and call the appropriate method — it enqueues a job rather than sending synchronously.
 
+### Utilities (`src/utils/`)
+
+#### Concurrency — `semaphore/`
+
+Redis-backed primitives built on `redis-semaphore`. Default timeouts: `acquireTimeout` 300 s, `lockTimeout` 60 s.
+
+- **`AppMutex`** — exclusive lock (1 holder). Methods: `tryAcquire()`, `acquire()`, `runExclusive(callback)`.
+- **`AppSemaphore`** — counting semaphore with a configurable `limit`. Wraps `MultiSemaphore`; all methods accept an optional `permits` argument. Methods: `tryAcquire(permits?)`, `acquire(permits?)`, `runExclusive(callback, permits?)`.
+- **`RateLimiter`** — throttles concurrent calls within a rolling time window using `AppSemaphore` as a token pool.
+  - `quota` — max concurrent tokens; `perMilliseconds` — window length.
+  - `mode: RateLimitMode.AtRequest` (token held for the full window from call start) vs `AtCompletion` (default; token held for `perMilliseconds` after the action finishes).
+  - `execute(action, { cost? })` — acquires `cost` tokens, runs the action, then schedules release.
+  - `cancelAll()` — increments a signal so in-flight `acquire` calls abandon their permits after acquisition.
+
+Usage pattern:
+```ts
+// Mutex — at most one caller at a time
+const mutex = new AppMutex("my-resource-key");
+await mutex.runExclusive(async () => { /* critical section */ });
+
+// Semaphore — at most N callers at a time
+const sem = new AppSemaphore("my-resource-key", /* limit */ 5);
+const release = await sem.acquire();
+try { /* ... */ } finally { release(); }
+
+// RateLimiter — at most 10 req/s (AtCompletion mode)
+const limiter = new RateLimiter({ key: "api", quota: 10, perMilliseconds: 1000 });
+const result = await limiter.execute(() => callExternalApi());
+```
+
 ### Error Handling
 
 Global exception filters in `src/exception/`:
