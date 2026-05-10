@@ -1,5 +1,6 @@
-import { Body, Controller, Get, Post, Put, Res } from "@nestjs/common";
+import { Body, Controller, Get, Post, Put, Res, UseGuards } from "@nestjs/common";
 import { ApiTags } from "@nestjs/swagger";
+import { SkipThrottle, ThrottlerGuard } from "@nestjs/throttler";
 import type { Response } from "express";
 import type { IAuthUser } from "../../types/auth.type";
 import { AuthService } from "./auth.service";
@@ -13,6 +14,7 @@ import { ResetPasswordBody } from "./dto/reset-password-body.dto";
 import { UpdatePasswordBody } from "./dto/update-password-body.dto";
 import { VerifyEmailBody } from "./dto/verify-email-body.dto";
 
+@UseGuards(ThrottlerGuard)
 @Controller("auth")
 @ApiTags("auth")
 export class AuthController {
@@ -28,6 +30,7 @@ export class AuthController {
 
   @Post("/logout")
   @PermitAll()
+  @SkipThrottle()
   async logout(@Res() res: Response) {
     res.cookie("token", "", { maxAge: 0, httpOnly: true, secure: true, sameSite: "strict" });
     res.json({ success: true });
@@ -40,6 +43,7 @@ export class AuthController {
   }
 
   @Get("/me")
+  @SkipThrottle()
   async getAuthUser(@AuthUser() authUser: IAuthUser) {
     return authUser;
   }

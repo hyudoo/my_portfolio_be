@@ -1,10 +1,20 @@
-import { Injectable } from "@nestjs/common";
+import { Inject, Injectable } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { JwtService } from "@nestjs/jwt";
+import Redis from "ioredis";
+import {
+  REDIS_CLIENT,
+  ROLE_PERMISSIONS_CACHE_TTL,
+  USER_CACHE_TTL,
+  roleCacheKey,
+  userCacheKey,
+  userRolesCacheKey,
+} from "../../constants/auth.constants";
 import { InjectRepository } from "@nestjs/typeorm";
 import { compare, hash } from "bcrypt";
-import { Repository } from "typeorm";
+import { In, Repository } from "typeorm";
 import { JWT_SECRET_KEY } from "../../constants/env-key.constant";
+import { RoleEntity } from "../../database/entities/role.entity";
 import { UserEntity } from "../../database/entities/user.entity";
 import { VerificationCodeEntity } from "../../database/entities/verification-code.entity";
 import { LoginBody } from "./dto/login-body.dto";
@@ -32,40 +42,74 @@ export class AuthService {
     private mailService: MailService,
     @InjectRepository(UserEntity)
     private userRepo: Repository<UserEntity>,
+    @InjectRepository(RoleEntity)
+    private roleRepo: Repository<RoleEntity>,
     @InjectRepository(VerificationCodeEntity)
     private verificationCodeRepo: Repository<VerificationCodeEntity>,
+    @Inject(REDIS_CLIENT)
+    private redisClient: Redis,
   ) {}
 
   async getUserById(id: number) {
+    const cacheKey = userCacheKey(id);
+    const cached = await this.redisClient.get(cacheKey);
+    if (cached) return JSON.parse(cached) as UserEntity;
+
     const user = await this.userRepo.findOneBy({ id });
+    if (!user) throw new AppException(ErrorCode.AUTH_USER_NOT_FOUND);
+    if (!user.isActive) throw new AppException(ErrorCode.AUTH_USER_INACTIVE);
 
-    if (!user) {
-      throw new AppException(ErrorCode.AUTH_USER_NOT_FOUND);
-    }
-    if (!user.isActive) {
-      throw new AppException(ErrorCode.AUTH_USER_INACTIVE);
-    }
-
+    await this.redisClient.setex(cacheKey, USER_CACHE_TTL, JSON.stringify(user));
     return user;
   }
 
   async getUserPermissions(userId: number): Promise<string[]> {
-    const user = await this.userRepo.findOne({
-      where: { id: userId },
-      relations: {
-        roles: { permissions: true },
-      },
+    const userRolesKey = userRolesCacheKey(userId);
+    const cachedRoles = await this.redisClient.get(userRolesKey);
+    let roleIds: number[];
+
+    if (cachedRoles) {
+      roleIds = JSON.parse(cachedRoles) as number[];
+    } else {
+      const user = await this.userRepo.findOne({
+        where: { id: userId },
+        relations: { roles: true },
+      });
+      if (!user) throw new AppException(ErrorCode.AUTH_USER_NOT_FOUND);
+      roleIds = user.roles.map((r) => r.id);
+      await this.redisClient.setex(userRolesKey, USER_CACHE_TTL, JSON.stringify(roleIds));
+    }
+
+    if (roleIds.length === 0) return [];
+
+    const roleKeys = roleIds.map(roleCacheKey);
+    const cachedPerms = await this.redisClient.mget(...roleKeys);
+
+    const permissions = new Set<string>();
+    const missingIds: number[] = [];
+
+    cachedPerms.forEach((entry, i) => {
+      if (entry) {
+        (JSON.parse(entry) as string[]).forEach((p) => permissions.add(p));
+      } else {
+        missingIds.push(roleIds[i]);
+      }
     });
 
-    if (!user) {
-      throw new AppException(ErrorCode.AUTH_USER_NOT_FOUND);
-    }
-    const permissions = new Set<string>();
-    user.roles.forEach((role) => {
-      role.permissions.forEach((permission) => {
-        permissions.add(permission.action);
+    if (missingIds.length > 0) {
+      const roles = await this.roleRepo.find({
+        where: { id: In(missingIds) },
+        relations: { permissions: true },
       });
-    });
+      const pipeline = this.redisClient.pipeline();
+      for (const role of roles) {
+        const actions = role.permissions.map((p) => p.action);
+        actions.forEach((a) => permissions.add(a));
+        pipeline.setex(roleCacheKey(role.id), ROLE_PERMISSIONS_CACHE_TTL, JSON.stringify(actions));
+      }
+      await pipeline.exec();
+    }
+
     return Array.from(permissions);
   }
 
@@ -143,10 +187,13 @@ export class AuthService {
       }
     }
 
+    const defaultRole = await this.roleRepo.findOneBy({ isDefault: true });
+
     const user: UserEntity = this.userRepo.create({
       ...body,
       password: await this._hashPassword(password),
       isActive: false,
+      ...(defaultRole ? { roles: [defaultRole] } : {}),
     });
 
     await this.userRepo.save(user);
@@ -225,6 +272,7 @@ export class AuthService {
 
     user.isActive = true;
     await this.userRepo.save(user);
+    await this.redisClient.del(userCacheKey(user.id));
 
     await this.verificationCodeRepo.delete({
       code,
@@ -254,6 +302,7 @@ export class AuthService {
 
     user.password = await this._hashPassword(password);
     await this.userRepo.save(user);
+    await this.redisClient.del(userCacheKey(user.id));
 
     await this.verificationCodeRepo.delete({
       code,
@@ -272,5 +321,6 @@ export class AuthService {
 
     authUser.password = await this._hashPassword(newPassword);
     await this.userRepo.save(authUser);
+    await this.redisClient.del(userCacheKey(authUser.id));
   }
 }
