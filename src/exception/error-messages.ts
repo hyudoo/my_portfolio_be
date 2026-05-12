@@ -22,6 +22,10 @@ export enum ErrorCode {
   // skill errors
   SKILL_CATEGORY_NOT_FOUND = "003001",
   SKILL_NOT_FOUND = "003002",
+
+  // file errors
+  FILE_NOT_FOUND = "004001",
+  FILE_S3_KEY_MISMATCH = "004002",
 }
 
 export const errorMessages: Record<ErrorCode, string> = {
@@ -47,4 +51,8 @@ export const errorMessages: Record<ErrorCode, string> = {
   // skill
   "003001": "Skill category not found",
   "003002": "Skill not found",
+
+  // file
+  "004001": "File not found",
+  "004002": "File s3Key does not match isPublic flag",
 };

@@ -14,3 +14,7 @@ export const SMTP_FROM = "SMTP_FROM";
 export const REDIS_HOST = "REDIS_HOST";
 export const REDIS_PORT = "REDIS_PORT";
 export const REDIS_PASSWORD = "REDIS_PASSWORD";
+
+export const AWS_ACCESS_KEY_ID = "AWS_ACCESS_KEY_ID";
+export const AWS_SECRET_ACCESS_KEY = "AWS_SECRET_ACCESS_KEY";
+export const AWS_S3_BUCKET = "AWS_S3_BUCKET";

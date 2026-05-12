@@ -14,6 +14,7 @@ import { PublicModule } from "./modules/public/public.module";
 import { SkillCategoryModule } from "./modules/skill-category/skill-category.module";
 import { UserModule } from "./modules/user/user.module";
 import { redisOptions } from "./redis/redis.config";
+import { FileModule } from './modules/file/file.module';
 
 @Module({
   imports: [
@@ -36,6 +37,7 @@ import { redisOptions } from "./redis/redis.config";
     RoleModule,
     SkillCategoryModule,
     PublicModule,
+    FileModule,
   ],
 })
 export class AppModule {}
