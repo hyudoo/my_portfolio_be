@@ -26,6 +26,10 @@ export enum ErrorCode {
   // file errors
   FILE_NOT_FOUND = "004001",
   FILE_S3_KEY_MISMATCH = "004002",
+
+  // project errors
+  PROJECT_CATEGORY_NOT_FOUND = "005001",
+  PROJECT_NOT_FOUND = "005002",
 }
 
 export const errorMessages: Record<ErrorCode, string> = {
@@ -55,4 +59,8 @@ export const errorMessages: Record<ErrorCode, string> = {
   // file
   "004001": "File not found",
   "004002": "File s3Key does not match isPublic flag",
+
+  // project
+  "005001": "Project category not found",
+  "005002": "Project not found",
 };

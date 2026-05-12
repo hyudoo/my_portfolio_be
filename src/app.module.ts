@@ -11,6 +11,7 @@ import { LoggerModule } from "./logger/logger.module";
 import { AuthModule } from "./modules/auth/auth.module";
 import { RoleModule } from "./modules/role/role.module";
 import { PublicModule } from "./modules/public/public.module";
+import { ProjectCategoryModule } from "./modules/project-category/project-category.module";
 import { SkillCategoryModule } from "./modules/skill-category/skill-category.module";
 import { UserModule } from "./modules/user/user.module";
 import { redisOptions } from "./redis/redis.config";
@@ -36,6 +37,7 @@ import { FileModule } from './modules/file/file.module';
     UserModule,
     RoleModule,
     SkillCategoryModule,
+    ProjectCategoryModule,
     PublicModule,
     FileModule,
   ],
