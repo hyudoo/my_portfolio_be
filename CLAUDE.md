@@ -118,3 +118,53 @@ Registered globally in `main.ts`.
 ### Code Style
 
 Prettier is configured with: double quotes (`singleQuote: false`), trailing commas (`trailingComma: all`), 120-char line width. ESLint enforces TypeScript rules. Run `yarn lint && yarn format` before committing.
+
+## Module Conventions
+
+### Module responsibility & folder structure
+
+Each module is only responsible for its own code. If resource B belongs to resource A, create module B as a sub-folder inside module A's folder, then import it into the parent module.
+
+```
+modules/skill-category/               ← parent module (app.module imports this)
+├── skill-category.module.ts
+├── skill-category.controller.ts
+├── skill-category.service.ts
+├── dto/
+└── skill/                            ← child module lives inside parent folder
+    ├── skill.module.ts
+    ├── skill.controller.ts
+    ├── skill.service.ts
+    ├── dto/
+    └── skill-public/                 ← public sub-module inside skill/
+        ├── skill-public.module.ts
+        └── skill-public.controller.ts
+```
+
+### Response key naming
+
+Response keys must always be the **camelCase of the module name** — never generic words like `data`, `item`, `result`, `category`.
+
+```typescript
+// module: skill-category
+return { skillCategories, total };   // list
+return { skillCategory };            // detail
+
+// module: skill
+return { skills, total };            // list
+return { skill };                    // detail
+```
+
+### Public routes
+
+All routes decorated with `@PermitAll()` must be defined in the single top-level `public` module (`src/modules/public/`). Do not scatter public endpoints across individual resource modules.
+
+```
+modules/public/
+├── public.module.ts     ← imports whichever resource modules it needs
+└── public.controller.ts ← all @PermitAll() routes, prefixed with /public
+```
+
+`PublicModule` imports the resource modules whose services it needs (e.g. `SkillCategoryModule`). Those modules must export the relevant service. `app.module.ts` imports `PublicModule` alongside the other modules.
+
+Public service methods live on the owning resource's service and are named `publicList()`, `publicDetail()`, etc. (e.g. `SkillCategoryService.publicList()`).

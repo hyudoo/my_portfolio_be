@@ -18,6 +18,10 @@ export enum ErrorCode {
   // role errors
   ROLE_NOT_FOUND = "001001",
   ROLE_DEFAULT_REQUIRED = "001002",
+
+  // skill errors
+  SKILL_CATEGORY_NOT_FOUND = "003001",
+  SKILL_NOT_FOUND = "003002",
 }
 
 export const errorMessages: Record<ErrorCode, string> = {
@@ -39,4 +43,8 @@ export const errorMessages: Record<ErrorCode, string> = {
   // role
   "001001": "Role not found",
   "001002": "Cannot unset default role, assign another role as default first",
+
+  // skill
+  "003001": "Skill category not found",
+  "003002": "Skill not found",
 };

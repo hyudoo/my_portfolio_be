@@ -10,6 +10,8 @@ import { ExceptionModule } from "./exception/exception.module";
 import { LoggerModule } from "./logger/logger.module";
 import { AuthModule } from "./modules/auth/auth.module";
 import { RoleModule } from "./modules/role/role.module";
+import { PublicModule } from "./modules/public/public.module";
+import { SkillCategoryModule } from "./modules/skill-category/skill-category.module";
 import { UserModule } from "./modules/user/user.module";
 import { redisOptions } from "./redis/redis.config";
 
@@ -32,6 +34,8 @@ import { redisOptions } from "./redis/redis.config";
     AuthModule,
     UserModule,
     RoleModule,
+    SkillCategoryModule,
+    PublicModule,
   ],
 })
 export class AppModule {}
