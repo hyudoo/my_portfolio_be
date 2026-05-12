@@ -9,6 +9,7 @@ import { options } from "./database/orm.config";
 import { ExceptionModule } from "./exception/exception.module";
 import { LoggerModule } from "./logger/logger.module";
 import { AuthModule } from "./modules/auth/auth.module";
+import { RoleModule } from "./modules/role/role.module";
 import { UserModule } from "./modules/user/user.module";
 import { redisOptions } from "./redis/redis.config";
 
@@ -30,6 +31,7 @@ import { redisOptions } from "./redis/redis.config";
     TypeOrmModule.forFeature(entities),
     AuthModule,
     UserModule,
+    RoleModule,
   ],
 })
 export class AppModule {}

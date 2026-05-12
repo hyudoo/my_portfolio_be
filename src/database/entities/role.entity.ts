@@ -7,6 +7,9 @@ export class RoleEntity extends BaseEntity {
   @Column({ type: "text" })
   name: string;
 
+  @Column({ type: "boolean", name: "is_default", default: false })
+  isDefault: boolean;
+
   @ManyToMany(() => PermissionEntity, {
     cascade: true,
     onDelete: "CASCADE",

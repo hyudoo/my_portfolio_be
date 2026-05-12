@@ -11,7 +11,7 @@ export class UserEntity extends BaseEntity {
   @Column({ type: "text", unique: true })
   email: string;
 
-  @Column({ type: "text" })
+  @Column({ type: "text", select: false })
   password: string;
 
   @Column({ type: "boolean", name: "is_active", default: true })

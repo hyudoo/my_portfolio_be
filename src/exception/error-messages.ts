@@ -14,6 +14,10 @@ export enum ErrorCode {
   WRONG_OLD_PASSWORD = "000006",
   AUTH_USER_INACTIVE = "000007",
   EXPIRED_CODE = "000008",
+
+  // role errors
+  ROLE_NOT_FOUND = "001001",
+  ROLE_DEFAULT_REQUIRED = "001002",
 }
 
 export const errorMessages: Record<ErrorCode, string> = {
@@ -31,4 +35,8 @@ export const errorMessages: Record<ErrorCode, string> = {
   "000006": "Current password is incorrect",
   "000007": "This account is INACTIVE",
   "000008": "Expired code",
+
+  // role
+  "001001": "Role not found",
+  "001002": "Cannot unset default role, assign another role as default first",
 };
