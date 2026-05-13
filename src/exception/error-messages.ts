@@ -36,6 +36,12 @@ export enum ErrorCode {
 
   // notification errors
   NOTIFICATION_NOT_FOUND = "007001",
+
+  // subscriber errors
+  SUBSCRIBER_EMAIL_ALREADY_EXISTS = "008001",
+  SUBSCRIBER_NOT_FOUND = "008002",
+  SUBSCRIBER_INVALID_TOKEN = "008003",
+  SUBSCRIBER_ALREADY_CONFIRMED = "008004",
 }
 
 export const errorMessages: Record<ErrorCode, string> = {
@@ -75,4 +81,10 @@ export const errorMessages: Record<ErrorCode, string> = {
 
   // notification
   "007001": "Notification not found",
+
+  // subscriber
+  "008001": "This email is already subscribed",
+  "008002": "Subscriber not found",
+  "008003": "Invalid or expired subscription token",
+  "008004": "This subscription has already been confirmed",
 };

@@ -11,3 +11,11 @@ export const getResetPasswordUrl = (email: string, digitsCode: string) => {
 export const getVerifyEmailUrl = (email: string, digitsCode: string) => {
   return `${feAppUrl}/verify-email?email=${email}&code=${digitsCode}`;
 };
+
+export const getSubscribeConfirmUrl = (code: string) => {
+  return `${feAppUrl}/subscribe/confirm?token=${code}`;
+};
+
+export const getUnsubscribeUrl = (code: string) => {
+  return `${feAppUrl}/unsubscribe?token=${code}`;
+};

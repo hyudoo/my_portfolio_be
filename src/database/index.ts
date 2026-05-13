@@ -1,4 +1,5 @@
 import { ContactEntity } from "./entities/contact.entity";
+import { SubscriberEntity } from "./entities/subscriber.entity";
 import { FileEntity } from "./entities/file.entity";
 import { NotificationEntity } from "./entities/notification.entity";
 import { PermissionEntity } from "./entities/permission.entity";
@@ -22,4 +23,5 @@ export const entities = [
   ProjectEntity,
   ContactEntity,
   NotificationEntity,
+  SubscriberEntity,
 ];

@@ -18,4 +18,8 @@ export class MailService {
   async sendContactNotification(name: string, email: string, subject: string, message: string) {
     await this.mailQueue.add(MailJobName.SEND_CONTACT_NOTIFICATION, { name, email, subject, message });
   }
+
+  async sendSubscribeConfirmation(email: string, confirmUrl: string, unsubscribeUrl: string) {
+    await this.mailQueue.add(MailJobName.SEND_SUBSCRIBE_CONFIRMATION, { email, confirmUrl, unsubscribeUrl });
+  }
 }

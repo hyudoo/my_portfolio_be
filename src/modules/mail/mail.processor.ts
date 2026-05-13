@@ -23,6 +23,12 @@ interface SendContactNotificationData {
   message: string;
 }
 
+interface SendSubscribeConfirmationData {
+  email: string;
+  confirmUrl: string;
+  unsubscribeUrl: string;
+}
+
 @Processor(MAIL_QUEUE)
 export class MailProcessor extends WorkerHost {
   constructor(
@@ -62,6 +68,16 @@ export class MailProcessor extends WorkerHost {
           subject: `[Portfolio] New contact: ${subject}`,
           template: "./contact-notification",
           context: { name, email, subject, message },
+        });
+        break;
+      }
+      case MailJobName.SEND_SUBSCRIBE_CONFIRMATION: {
+        const { email, confirmUrl, unsubscribeUrl } = job.data as SendSubscribeConfirmationData;
+        await this.mailerService.sendMail({
+          to: email,
+          subject: "Confirm your newsletter subscription",
+          template: "./subscribe-confirmation",
+          context: { email, confirmUrl, unsubscribeUrl },
         });
         break;
       }
