@@ -1,4 +1,6 @@
+import { ContactEntity } from "./entities/contact.entity";
 import { FileEntity } from "./entities/file.entity";
+import { NotificationEntity } from "./entities/notification.entity";
 import { PermissionEntity } from "./entities/permission.entity";
 import { ProjectCategoryEntity } from "./entities/project-category.entity";
 import { ProjectEntity } from "./entities/project.entity";
@@ -18,4 +20,6 @@ export const entities = [
   FileEntity,
   ProjectCategoryEntity,
   ProjectEntity,
+  ContactEntity,
+  NotificationEntity,
 ];

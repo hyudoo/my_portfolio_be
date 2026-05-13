@@ -1,6 +1,7 @@
 import { MailerService } from "@nestjs-modules/mailer";
 import { Processor, WorkerHost } from "@nestjs/bullmq";
 import { Job } from "bullmq";
+import { ConfigService } from "@nestjs/config";
 import { MAIL_QUEUE, MailJobName } from "../../constants/mail.queue.constant";
 
 interface SendVerifyEmailData {
@@ -15,9 +16,19 @@ interface SendResetPasswordData {
   username: string;
 }
 
+interface SendContactNotificationData {
+  name: string;
+  email: string;
+  subject: string;
+  message: string;
+}
+
 @Processor(MAIL_QUEUE)
 export class MailProcessor extends WorkerHost {
-  constructor(private readonly mailerService: MailerService) {
+  constructor(
+    private readonly mailerService: MailerService,
+    private readonly configService: ConfigService,
+  ) {
     super();
   }
 
@@ -40,6 +51,17 @@ export class MailProcessor extends WorkerHost {
           subject: "Reset password",
           template: "./reset-password",
           context: { resetPasswordUrl, username },
+        });
+        break;
+      }
+      case MailJobName.SEND_CONTACT_NOTIFICATION: {
+        const { name, email, subject, message } = job.data as SendContactNotificationData;
+        const ownerEmail = this.configService.get<string>("OWNER_EMAIL");
+        await this.mailerService.sendMail({
+          to: ownerEmail,
+          subject: `[Portfolio] New contact: ${subject}`,
+          template: "./contact-notification",
+          context: { name, email, subject, message },
         });
         break;
       }

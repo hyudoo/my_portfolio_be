@@ -14,4 +14,8 @@ export class MailService {
   async sendVerifyEmailLink(email: string, verifyEmailUrl: string, username: string) {
     await this.mailQueue.add(MailJobName.SEND_VERIFY_EMAIL, { email, verifyEmailUrl, username });
   }
+
+  async sendContactNotification(name: string, email: string, subject: string, message: string) {
+    await this.mailQueue.add(MailJobName.SEND_CONTACT_NOTIFICATION, { name, email, subject, message });
+  }
 }

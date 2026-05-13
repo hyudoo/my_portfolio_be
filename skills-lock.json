@@ -1,0 +1,59 @@
+{
+  "version": 1,
+  "skills": {
+    "api-design": {
+      "source": "affaan-m/everything-claude-code",
+      "sourceType": "github",
+      "skillPath": "skills/api-design/SKILL.md",
+      "computedHash": "cd8dad9f9cf4eae8632a3969cd12f4e9ad1f9d58a9ed607c2d9ce51876d6dd13"
+    },
+    "backend-patterns": {
+      "source": "affaan-m/everything-claude-code",
+      "sourceType": "github",
+      "skillPath": "skills/backend-patterns/SKILL.md",
+      "computedHash": "d7ed6fc2707b070cb8a422ba7f9e1198a2ed8098920789ab0be8be494390391a"
+    },
+    "coding-standards": {
+      "source": "affaan-m/everything-claude-code",
+      "sourceType": "github",
+      "skillPath": "skills/coding-standards/SKILL.md",
+      "computedHash": "ebb4d173fb97f0189986097bcf0c4c4bfa64f0dd713ec094947ccf7b549efbe4"
+    },
+    "database-migrations": {
+      "source": "affaan-m/everything-claude-code",
+      "sourceType": "github",
+      "skillPath": "skills/database-migrations/SKILL.md",
+      "computedHash": "9ad960c29effe20f801f6589c580b5c81702fbb6fa835e3a6d9eb78ff856981c"
+    },
+    "postgres-patterns": {
+      "source": "affaan-m/everything-claude-code",
+      "sourceType": "github",
+      "skillPath": "skills/postgres-patterns/SKILL.md",
+      "computedHash": "8056467956521c8f4b58caefa9f91584be64e4bcccdaa8090a147c0b81f88aeb"
+    },
+    "redis-patterns": {
+      "source": "affaan-m/everything-claude-code",
+      "sourceType": "github",
+      "skillPath": "skills/redis-patterns/SKILL.md",
+      "computedHash": "ab933475340855635a284aec8c5655039abb247551efd52259d63f74f70368e3"
+    },
+    "security-scan": {
+      "source": "affaan-m/everything-claude-code",
+      "sourceType": "github",
+      "skillPath": "skills/security-scan/SKILL.md",
+      "computedHash": "da0906902dd47d54357b9d80d50c4dcc9c350137dbe5a7fb7fc9830245a57c1e"
+    },
+    "tdd-workflow": {
+      "source": "affaan-m/everything-claude-code",
+      "sourceType": "github",
+      "skillPath": "skills/tdd-workflow/SKILL.md",
+      "computedHash": "c03b44b81e6baa41000b3ce8305640900721becc1e707f4dbdf65b1c6d76d300"
+    },
+    "verification-loop": {
+      "source": "affaan-m/everything-claude-code",
+      "sourceType": "github",
+      "skillPath": "skills/verification-loop/SKILL.md",
+      "computedHash": "c936d8f1c28920133a6dd6b4c70e9784315f64f71b8d8bb69e61fa8e044cb175"
+    }
+  }
+}

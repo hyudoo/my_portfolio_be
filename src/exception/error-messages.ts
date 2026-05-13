@@ -30,6 +30,12 @@ export enum ErrorCode {
   // project errors
   PROJECT_CATEGORY_NOT_FOUND = "005001",
   PROJECT_NOT_FOUND = "005002",
+
+  // contact errors
+  CONTACT_NOT_FOUND = "006001",
+
+  // notification errors
+  NOTIFICATION_NOT_FOUND = "007001",
 }
 
 export const errorMessages: Record<ErrorCode, string> = {
@@ -63,4 +69,10 @@ export const errorMessages: Record<ErrorCode, string> = {
   // project
   "005001": "Project category not found",
   "005002": "Project not found",
+
+  // contact
+  "006001": "Contact not found",
+
+  // notification
+  "007001": "Notification not found",
 };

@@ -9,6 +9,8 @@ import { options } from "./database/orm.config";
 import { ExceptionModule } from "./exception/exception.module";
 import { LoggerModule } from "./logger/logger.module";
 import { AuthModule } from "./modules/auth/auth.module";
+import { ContactModule } from "./modules/contact/contact.module";
+import { NotificationModule } from "./modules/notification/notification.module";
 import { RoleModule } from "./modules/role/role.module";
 import { PublicModule } from "./modules/public/public.module";
 import { ProjectCategoryModule } from "./modules/project-category/project-category.module";
@@ -40,6 +42,8 @@ import { FileModule } from './modules/file/file.module';
     ProjectCategoryModule,
     PublicModule,
     FileModule,
+    ContactModule,
+    NotificationModule,
   ],
 })
 export class AppModule {}
