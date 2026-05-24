@@ -12,6 +12,7 @@ import {
 } from "../../constants/auth.constants";
 import { InjectRepository } from "@nestjs/typeorm";
 import { compare, hash } from "bcrypt";
+import { createHash, randomBytes } from "crypto";
 import { In, Repository } from "typeorm";
 import { JWT_SECRET_KEY } from "../../constants/env-key.constant";
 import { RoleEntity } from "../../database/entities/role.entity";
@@ -20,8 +21,8 @@ import { VerificationCodeEntity } from "../../database/entities/verification-cod
 import { LoginBody } from "./dto/login-body.dto";
 import { AppException } from "../../exception/app.exception";
 import { ErrorCode } from "../../exception/error-messages";
-import { randomDigitsSet } from "../../utils/random-digits-set.util";
 import { getResetPasswordUrl, getVerifyEmailUrl } from "../../utils/get-url.util";
+import { Locale } from "../../enums/locale.enum";
 import { CodeType } from "../../enums/code-type.enum";
 import { datetime } from "../../utils/datetime.util";
 import { MailService } from "../mail/mail.service";
@@ -121,39 +122,21 @@ export class AuthService {
     return compare(password, hashed);
   }
 
-  private async _checkVerifyCode(email: string, code: string, type: CodeType) {
-    const query = this.verificationCodeRepo
-      .createQueryBuilder("verificationCodes")
-      .innerJoin("verificationCodes.user", "user")
-      .where({ code })
-      .andWhere({ type })
-      .andWhere("user.email = :email", { email });
-
-    const verificationCode = await query.getOne();
-
-    if (!verificationCode) {
-      throw new AppException(ErrorCode.INVALID_CODE);
-    }
-
-    if (datetime().isAfter(datetime(verificationCode.expiresAt))) {
-      throw new AppException(ErrorCode.EXPIRED_CODE);
-    }
-  }
-
-  async _sendVerifyMail(user: UserEntity) {
+  async _sendVerifyMail(user: UserEntity, locale: Locale) {
     const { id, email, username } = user;
 
-    const digitsCode = randomDigitsSet(6);
-    const verifyEmailUrl = getVerifyEmailUrl(email, digitsCode);
+    const rawToken = randomBytes(32).toString("hex");
+    const hashedToken = createHash("sha256").update(rawToken).digest("hex");
+
     const verificationCode = this.verificationCodeRepo.create({
-      code: digitsCode,
+      code: hashedToken,
       userId: id,
       type: CodeType.VerifyEmail,
       expiresAt: datetime().add(30, "minutes"),
     });
     await this.verificationCodeRepo.save(verificationCode);
 
-    await this.mailService.sendVerifyEmailLink(email, verifyEmailUrl, username);
+    await this.mailService.sendVerifyEmailLink(email, getVerifyEmailUrl(rawToken, locale), username);
   }
 
   async login(body: LoginBody) {
@@ -198,7 +181,7 @@ export class AuthService {
 
     await this.userRepo.save(user);
 
-    await this._sendVerifyMail(user);
+    await this._sendVerifyMail(user, body.locale);
   }
 
   @Transactional()
@@ -217,12 +200,12 @@ export class AuthService {
       type: CodeType.VerifyEmail,
     });
 
-    await this._sendVerifyMail(user);
+    await this._sendVerifyMail(user, body.locale);
   }
 
   @Transactional()
   async forgotPassword(body: ForgotPasswordBody) {
-    const { email } = body;
+    const { email, locale } = body;
     const user = await this.userRepo.findOne({
       where: {
         email,
@@ -238,77 +221,76 @@ export class AuthService {
       type: CodeType.ResetPassword,
     });
 
-    const digitsCode = randomDigitsSet(6);
+    const rawToken = randomBytes(32).toString("hex");
+    const hashedToken = createHash("sha256").update(rawToken).digest("hex");
+
     const verificationCode = this.verificationCodeRepo.create({
-      code: digitsCode,
+      code: hashedToken,
       userId: user.id,
       type: CodeType.ResetPassword,
       expiresAt: datetime().add(30, "minutes"),
     });
 
     await this.verificationCodeRepo.save(verificationCode);
-    const resetPasswordUrl = getResetPasswordUrl(email, digitsCode);
+    const resetPasswordUrl = getResetPasswordUrl(rawToken, locale);
 
     await this.mailService.sendResetPasswordEmail(email, resetPasswordUrl, user.username);
   }
 
   @Transactional()
   async verifyEmail(body: VerifyEmailBody) {
-    const { email, code } = body;
-    await this._checkVerifyCode(email, code, CodeType.VerifyEmail);
+    const { token } = body;
 
-    const queryBuilder = this.userRepo
-      .createQueryBuilder("users")
-      .innerJoin("users.verificationCodes", "verificationCodes")
-      .where({ email })
-      .andWhere("verificationCodes.type = :type", { type: CodeType.VerifyEmail })
-      .andWhere("verificationCodes.code = :code", { code });
+    const hashedToken = createHash("sha256").update(token).digest("hex");
 
-    const user = await queryBuilder.getOne();
+    const verificationCode = await this.verificationCodeRepo.findOne({
+      where: { code: hashedToken, type: CodeType.VerifyEmail },
+    });
 
-    if (!user) {
+    if (!verificationCode) {
       throw new AppException(ErrorCode.INVALID_CODE);
     }
+
+    if (datetime().isAfter(datetime(verificationCode.expiresAt))) {
+      throw new AppException(ErrorCode.EXPIRED_CODE);
+    }
+
+    const user = await this.userRepo.findOneBy({ id: verificationCode.userId! });
+    if (!user) throw new AppException(ErrorCode.INVALID_CODE);
 
     user.isActive = true;
     await this.userRepo.save(user);
     await this.redisClient.del(userCacheKey(user.id));
 
-    await this.verificationCodeRepo.delete({
-      code,
-      userId: user.id,
-      type: CodeType.VerifyEmail,
-    });
+    await this.verificationCodeRepo.delete({ id: verificationCode.id });
   }
 
   @Transactional()
   async resetPassword(body: ResetPasswordBody) {
-    const { email, code, password } = body;
+    const { token, password } = body;
 
-    await this._checkVerifyCode(email, code, CodeType.ResetPassword);
+    const hashedToken = createHash("sha256").update(token).digest("hex");
 
-    const queryBuilder = this.userRepo
-      .createQueryBuilder("users")
-      .innerJoin("users.verificationCodes", "verificationCodes")
-      .where({ email })
-      .andWhere("verificationCodes.type = :type", { type: CodeType.ResetPassword })
-      .andWhere("verificationCodes.code = :code", { code });
+    const verificationCode = await this.verificationCodeRepo.findOne({
+      where: { code: hashedToken, type: CodeType.ResetPassword },
+    });
 
-    const user = await queryBuilder.getOne();
-
-    if (!user) {
+    if (!verificationCode) {
       throw new AppException(ErrorCode.INVALID_CODE);
     }
+
+    if (datetime().isAfter(datetime(verificationCode.expiresAt))) {
+      throw new AppException(ErrorCode.EXPIRED_CODE);
+    }
+
+    const user = await this.userRepo.findOneBy({ id: verificationCode.userId! });
+    if (!user) throw new AppException(ErrorCode.AUTH_USER_NOT_FOUND);
 
     user.password = await this._hashPassword(password);
     await this.userRepo.save(user);
     await this.redisClient.del(userCacheKey(user.id));
 
-    await this.verificationCodeRepo.delete({
-      code,
-      userId: user.id,
-      type: CodeType.ResetPassword,
-    });
+    await this.verificationCodeRepo.delete({ id: verificationCode.id });
   }
 
   @Transactional()

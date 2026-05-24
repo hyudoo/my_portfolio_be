@@ -12,6 +12,7 @@ import { IdsBody } from "../../utils/dto/ids-body.dto";
 import { toSearchString } from "../../utils/to-search-string.util";
 import { datetime } from "../../utils/datetime.util";
 import { getSubscribeConfirmUrl, getUnsubscribeUrl } from "../../utils/get-url.util";
+import { Locale } from "../../enums/locale.enum";
 import { MailService } from "../mail/mail.service";
 import { ListSubscriberQuery } from "./dto/list-subscriber.dto";
 import { SubscribeDto } from "./dto/subscribe.dto";
@@ -26,7 +27,7 @@ export class SubscriberService {
 
   @Transactional()
   async subscribe(body: SubscribeDto): Promise<{ message: string }> {
-    const { email } = body;
+    const { email, locale } = body;
     const existing = await this.subscriberRepo.findOne({ where: { email } });
 
     if (existing) {
@@ -38,17 +39,17 @@ export class SubscriberService {
         subscriberId: existing.id,
         type: CodeType.SubscribeConfirm,
       });
-      await this._sendConfirmationEmail(email, existing.id);
+      await this._sendConfirmationEmail(email, existing.id, locale);
       return { message: "Confirmation email sent" };
     }
 
     const subscriber = this.subscriberRepo.create({ email, confirmedAt: null });
     await this.subscriberRepo.save(subscriber);
-    await this._sendConfirmationEmail(email, subscriber.id);
+    await this._sendConfirmationEmail(email, subscriber.id, locale);
     return { message: "Confirmation email sent" };
   }
 
-  private async _sendConfirmationEmail(email: string, subscriberId: number) {
+  private async _sendConfirmationEmail(email: string, subscriberId: number, locale: Locale) {
     const code = randomUUID();
     const verificationCode = this.verificationCodeRepo.create({
       code,
@@ -61,8 +62,8 @@ export class SubscriberService {
 
     void this.mailService.sendSubscribeConfirmation(
       email,
-      getSubscribeConfirmUrl(code),
-      getUnsubscribeUrl(code),
+      getSubscribeConfirmUrl(code, locale),
+      getUnsubscribeUrl(code, locale),
     );
   }
 

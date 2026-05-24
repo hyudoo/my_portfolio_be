@@ -1,21 +1,22 @@
 import { FE_APP_URL } from "../constants/env-key.constant";
+import { Locale } from "../enums/locale.enum";
 import { config } from "dotenv";
 config();
 
 const feAppUrl = process.env[FE_APP_URL];
 
-export const getResetPasswordUrl = (email: string, digitsCode: string) => {
-  return `${feAppUrl}/auth/reset-password?email=${email}&code=${digitsCode}`;
+export const getResetPasswordUrl = (token: string, locale: Locale = Locale.En) => {
+  return `${feAppUrl}/${locale}/reset-password?token=${token}`;
 };
 
-export const getVerifyEmailUrl = (email: string, digitsCode: string) => {
-  return `${feAppUrl}/verify-email?email=${email}&code=${digitsCode}`;
+export const getVerifyEmailUrl = (token: string, locale: Locale = Locale.En) => {
+  return `${feAppUrl}/${locale}/verify-email?token=${token}`;
 };
 
-export const getSubscribeConfirmUrl = (code: string) => {
-  return `${feAppUrl}/subscribe/confirm?token=${code}`;
+export const getSubscribeConfirmUrl = (code: string, locale: Locale = Locale.En) => {
+  return `${feAppUrl}/${locale}/subscribe/confirm?token=${code}`;
 };
 
-export const getUnsubscribeUrl = (code: string) => {
-  return `${feAppUrl}/unsubscribe?token=${code}`;
+export const getUnsubscribeUrl = (code: string, locale: Locale = Locale.En) => {
+  return `${feAppUrl}/${locale}/unsubscribe?token=${code}`;
 };

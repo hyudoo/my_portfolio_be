@@ -46,8 +46,12 @@ export class AdminSeeder implements Seeder {
     const roleRepo = connection.getRepository(RoleEntity);
     const userRepo = connection.getRepository(UserEntity);
 
-    const permissions = permissionRepo.create(ALL_PERMISSIONS.map((action) => ({ action })));
-    await permissionRepo.save(permissions);
+    const permissions = await Promise.all(
+      ALL_PERMISSIONS.map(async (action) => {
+        const existing = await permissionRepo.findOne({ where: { action } });
+        return existing ?? (await permissionRepo.save(permissionRepo.create({ action })));
+      }),
+    );
 
     const adminRole = roleRepo.create({
       name: "admin",

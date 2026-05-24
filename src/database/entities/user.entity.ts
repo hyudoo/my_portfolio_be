@@ -2,6 +2,7 @@ import { Column, DeleteDateColumn, Entity, JoinTable, ManyToMany, OneToMany } fr
 import { BaseEntity } from "./_base.entity";
 import { RoleEntity } from "./role.entity";
 import { VerificationCodeEntity } from "./verification-code.entity";
+import { Exclude } from "class-transformer";
 
 @Entity("users")
 export class UserEntity extends BaseEntity {
@@ -11,7 +12,8 @@ export class UserEntity extends BaseEntity {
   @Column({ type: "text", unique: true })
   email: string;
 
-  @Column({ type: "text", select: false })
+  @Exclude()
+  @Column({ type: "text" })
   password: string;
 
   @Column({ type: "boolean", name: "is_active", default: true })
