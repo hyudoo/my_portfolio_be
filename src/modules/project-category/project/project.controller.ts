@@ -15,7 +15,7 @@ import { ProjectService } from "./project.service";
 export class ProjectController {
   constructor(private service: ProjectService) {}
 
-  @RequiredPermissions("project::write")
+  @RequiredPermissions("project::create")
   @Post("/")
   async create(@AuthUser() authUser: IAuthUser, @Body() body: CreateProjectDto) {
     return this.service.create(authUser, body);

@@ -15,7 +15,7 @@ import { ProjectCategoryService } from "./project-category.service";
 export class ProjectCategoryController {
   constructor(private service: ProjectCategoryService) {}
 
-  @RequiredPermissions("project-category::write")
+  @RequiredPermissions("project-category::create")
   @Post("/")
   async create(@AuthUser() authUser: IAuthUser, @Body() body: CreateProjectCategoryDto) {
     return this.service.create(authUser, body);

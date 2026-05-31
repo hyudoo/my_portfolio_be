@@ -15,7 +15,7 @@ import { RoleService } from "./role.service";
 export class RoleController {
   constructor(private service: RoleService) {}
 
-  @RequiredPermissions("role::write")
+  @RequiredPermissions("role::create")
   @Post("/")
   async create(@AuthUser() authUser: IAuthUser, @Body() body: CreateRoleBody) {
     return this.service.create(authUser, body);

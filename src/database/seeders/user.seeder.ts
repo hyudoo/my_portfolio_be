@@ -15,7 +15,7 @@ export class UserSeeder implements Seeder {
 
     const password = hashSync(process.env.ADMIN_PASSWORD!, 12);
 
-    const permissionActions = ["user::read", "user::write"];
+    const permissionActions = ["user::read", "user::create"];
     const permissions = await Promise.all(
       permissionActions.map(async (action) => {
         const existing = await permissionRepo.findOne({ where: { action } });

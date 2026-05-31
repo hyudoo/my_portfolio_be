@@ -15,7 +15,7 @@ import { SkillCategoryService } from "./skill-category.service";
 export class SkillCategoryController {
   constructor(private service: SkillCategoryService) {}
 
-  @RequiredPermissions("skill-category::write")
+  @RequiredPermissions("skill-category::create")
   @Post("/")
   async create(@AuthUser() authUser: IAuthUser, @Body() body: CreateSkillCategoryDto) {
     return this.service.create(authUser, body);

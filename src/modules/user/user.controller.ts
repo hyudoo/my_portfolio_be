@@ -15,7 +15,7 @@ import { RequiredPermissions } from "../auth/decorators/required-permission.deco
 export class UserController {
   constructor(private service: UserService) {}
 
-  @RequiredPermissions("user::write")
+  @RequiredPermissions("user::create")
   @Post("/")
   async create(@AuthUser() authUser: IAuthUser, @Body() body: CreateUserBody) {
     return this.service.create(authUser, body);
