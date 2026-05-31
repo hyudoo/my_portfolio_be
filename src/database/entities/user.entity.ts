@@ -1,5 +1,6 @@
-import { Column, DeleteDateColumn, Entity, JoinTable, ManyToMany, OneToMany } from "typeorm";
+import { Column, DeleteDateColumn, Entity, JoinColumn, JoinTable, ManyToMany, ManyToOne, OneToMany } from "typeorm";
 import { BaseEntity } from "./_base.entity";
+import { FileEntity } from "./file.entity";
 import { RoleEntity } from "./role.entity";
 import { VerificationCodeEntity } from "./verification-code.entity";
 import { Exclude } from "class-transformer";
@@ -21,6 +22,13 @@ export class UserEntity extends BaseEntity {
 
   @DeleteDateColumn({ type: "timestamptz", name: "deleted_at", precision: 3, nullable: true })
   deletedAt?: Date;
+
+  @Column({ type: "int", name: "avatar_id", nullable: true })
+  avatarId?: number | null;
+
+  @ManyToOne(() => FileEntity, { nullable: true, onDelete: "SET NULL", eager: false })
+  @JoinColumn({ name: "avatar_id" })
+  avatar?: FileEntity | null;
 
   @ManyToMany(() => RoleEntity, {
     onDelete: "CASCADE",

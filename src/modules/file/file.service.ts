@@ -19,7 +19,7 @@ export class FileService {
   constructor(
     @InjectRepository(FileEntity) private fileRepo: Repository<FileEntity>,
     private awsService: AWSService,
-  ) {}
+  ) { }
 
   async getPresignedUrl(_authUser: IAuthUser, body: GetPresignedUrlBody) {
     const { filename, contentType, size, isPublic } = body;
@@ -70,5 +70,15 @@ export class FileService {
 
       await this.fileRepo.delete(ids);
     }
+  }
+
+  @Transactional()
+  async _delete(p: number | FileEntity) {
+    if (typeof p === "number") {
+      p = await this.fileRepo.findOneByOrFail({ id: p });
+    }
+
+    await this.awsService.removeS3Object(p.s3Key);
+    await this.fileRepo.delete(p.id);
   }
 }
