@@ -33,6 +33,7 @@ import { ForgotPasswordBody } from "./dto/forgot-password-body.dto";
 import { VerifyEmailBody } from "./dto/verify-email-body.dto";
 import { ResetPasswordBody } from "./dto/reset-password-body.dto";
 import { IAuthUser } from "../../types/auth.type";
+import { UpdateInfoBody } from "./dto/update-info-body.dto";
 import { UpdatePasswordBody } from "./dto/update-password-body.dto";
 
 @Injectable()
@@ -56,7 +57,7 @@ export class AuthService {
     const cached = await this.redisClient.get(cacheKey);
     if (cached) return JSON.parse(cached) as UserEntity;
 
-    const user = await this.userRepo.findOneBy({ id });
+    const user = await this.userRepo.findOne({ where: { id }, relations: { avatar: true } });
     if (!user) throw new AppException(ErrorCode.AUTH_USER_NOT_FOUND);
     if (!user.isActive) throw new AppException(ErrorCode.AUTH_USER_INACTIVE);
 
@@ -119,6 +120,8 @@ export class AuthService {
   }
 
   private async _comparePassword(password: string, hashed: string) {
+    console.log("---------------------------------");
+    console.log(password, hashed);
     return compare(password, hashed);
   }
 
@@ -140,7 +143,7 @@ export class AuthService {
   }
 
   async login(body: LoginBody) {
-    const { email, password, remember } = body;
+    const { email, password } = body;
     const user = await this.userRepo.findOneBy({ email });
     if (!user || !(await this._comparePassword(password, user.password))) {
       throw new AppException(ErrorCode.WRONG_CREDENTIALS);
@@ -152,9 +155,8 @@ export class AuthService {
       { id: user.id },
       { secret: this.configService.get(JWT_SECRET_KEY) },
     );
-    const maxAge = remember ? this.jwtService.decode(accessToken).exp * 1000 - Date.now() : undefined;
 
-    return { accessToken, maxAge };
+    return { accessToken };
   }
 
   @Transactional()
@@ -293,16 +295,26 @@ export class AuthService {
     await this.verificationCodeRepo.delete({ id: verificationCode.id });
   }
 
+  async updateInfo(authUser: IAuthUser, body: UpdateInfoBody) {
+    const { username, avatarId } = body;
+    authUser.username = username;
+    if (avatarId !== undefined) {
+      authUser.avatarId = avatarId ?? null;
+    }
+    await this.userRepo.save(authUser);
+    await this.redisClient.del(userCacheKey(authUser.id));
+  }
+
   @Transactional()
   async updatePassword(authUser: IAuthUser, body: UpdatePasswordBody) {
     const { password, newPassword } = body;
 
-    if (!(await this._comparePassword(password, authUser.password))) {
+    const user = await this.userRepo.findOneByOrFail({ id: authUser.id });
+    if (!(await this._comparePassword(password, user.password))) {
       throw new AppException(ErrorCode.WRONG_OLD_PASSWORD);
     }
-
-    authUser.password = await this._hashPassword(newPassword);
-    await this.userRepo.save(authUser);
+    user.password = await this._hashPassword(newPassword);
+    await this.userRepo.save(user);
     await this.redisClient.del(userCacheKey(authUser.id));
   }
 }

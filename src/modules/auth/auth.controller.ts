@@ -11,6 +11,7 @@ import { LoginBody } from "./dto/login-body.dto";
 import { RegisterBody } from "./dto/register-body.dto";
 import { ResendVerifyEmailBody } from "./dto/resend-verify-email-body.dto";
 import { ResetPasswordBody } from "./dto/reset-password-body.dto";
+import { UpdateInfoBody } from "./dto/update-info-body.dto";
 import { UpdatePasswordBody } from "./dto/update-password-body.dto";
 import { VerifyEmailBody } from "./dto/verify-email-body.dto";
 
@@ -22,10 +23,8 @@ export class AuthController {
 
   @Post("/login")
   @PermitAll()
-  async login(@Res() res: Response, @Body() body: LoginBody) {
-    const { accessToken, maxAge } = await this.service.login(body);
-    res.cookie("token", accessToken, { maxAge, httpOnly: true, secure: true, sameSite: "strict" });
-    res.json({ accessToken });
+  async login(@Body() body: LoginBody) {
+    return this.service.login(body);
   }
 
   @Post("/logout")
@@ -70,6 +69,11 @@ export class AuthController {
   @PermitAll()
   async resetPassword(@Body() body: ResetPasswordBody) {
     return this.service.resetPassword(body);
+  }
+
+  @Put("/update-info")
+  async updateInfo(@AuthUser() authUser: IAuthUser, @Body() body: UpdateInfoBody) {
+    return this.service.updateInfo(authUser, body);
   }
 
   @Put("/update-password")
