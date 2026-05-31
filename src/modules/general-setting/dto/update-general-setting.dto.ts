@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
-import { IsBoolean, IsOptional, IsString, Length } from "class-validator";
+import { IsBoolean, IsInt, IsOptional, IsString, Length } from "class-validator";
 import { ToStringOrNull } from "../../../utils/decorators/to-string-or-null.decorator";
 import { Trim } from "../../../utils/decorators/trim.decorator";
 
@@ -23,13 +23,25 @@ export class UpdateGeneralSettingDto {
   @Trim()
   @IsString()
   @Length(0, 255)
-  tagline?: string;
+  heroTitle1?: string;
+
+  @ApiPropertyOptional({ type: "string" })
+  @IsOptional()
+  @Trim()
+  @IsString()
+  @Length(0, 255)
+  heroTitle2?: string;
 
   @ApiPropertyOptional({ type: "string" })
   @IsOptional()
   @Trim()
   @IsString()
   bio?: string;
+
+  @ApiPropertyOptional({ type: "string" })
+  @IsOptional()
+  @IsString()
+  aboutContent?: string;
 
   @ApiPropertyOptional({ type: "string" })
   @IsOptional()
@@ -160,4 +172,9 @@ export class UpdateGeneralSettingDto {
   @IsString()
   @Length(0, 255)
   sectionOrder?: string;
+
+  @ApiPropertyOptional({ type: "number", nullable: true })
+  @IsOptional()
+  @IsInt()
+  profileImageId?: number | null;
 }

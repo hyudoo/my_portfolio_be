@@ -8,10 +8,10 @@ import { AppException } from "../../../exception/app.exception";
 import { ErrorCode } from "../../../exception/error-messages";
 import { IAuthUser } from "../../../types/auth.type";
 import { IdsBody } from "../../../utils/dto/ids-body.dto";
-import { ListQuery } from "../../../utils/dto/list-query.dto";
 import { toSearchString } from "../../../utils/to-search-string.util";
 import { updateEntity } from "../../../utils/update-entity.util";
 import { CreateSkillDto } from "./dto/create-skill.dto";
+import { ListSkillsQuery } from "./dto/list-skills-query.dto";
 import { UpdateSkillDto } from "./dto/update-skill.dto";
 
 @Injectable()
@@ -21,13 +21,14 @@ export class SkillService {
     @InjectRepository(SkillCategoryEntity) private skillCategoryRepo: Repository<SkillCategoryEntity>,
   ) {}
 
-  async list(authUser: IAuthUser, query: ListQuery) {
-    const { keyword, take, skip, locale } = query;
+  async list(authUser: IAuthUser, query: ListSkillsQuery) {
+    const { keyword, categoryId, take, skip, locale } = query;
 
     const queryBuilder = this.skillRepo
       .createQueryBuilder("skill")
       .leftJoinAndSelect("skill.category", "category")
       .addOrderBy("skill.order", "ASC")
+      .where("skill.category_id = :categoryId", { categoryId })
       .take(take)
       .skip(skip);
 

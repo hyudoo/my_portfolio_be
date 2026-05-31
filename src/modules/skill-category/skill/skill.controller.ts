@@ -3,10 +3,10 @@ import { ApiTags } from "@nestjs/swagger";
 import { IAuthUser } from "../../../types/auth.type";
 import { IdParam } from "../../../utils/dto/id-param.dto";
 import { IdsBody } from "../../../utils/dto/ids-body.dto";
-import { ListQuery } from "../../../utils/dto/list-query.dto";
 import { AuthUser } from "../../auth/decorators/auth-user.decorator";
 import { RequiredPermissions } from "../../auth/decorators/required-permission.decorator";
 import { CreateSkillDto } from "./dto/create-skill.dto";
+import { ListSkillsQuery } from "./dto/list-skills-query.dto";
 import { UpdateSkillDto } from "./dto/update-skill.dto";
 import { SkillService } from "./skill.service";
 
@@ -23,7 +23,7 @@ export class SkillController {
 
   @RequiredPermissions("skill::read")
   @Get("/")
-  async list(@AuthUser() authUser: IAuthUser, @Query() query: ListQuery) {
+  async list(@AuthUser() authUser: IAuthUser, @Query() query: ListSkillsQuery) {
     return this.service.list(authUser, query);
   }
 

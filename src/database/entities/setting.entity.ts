@@ -1,5 +1,6 @@
-import { Column, Entity } from "typeorm";
+import { Column, Entity, JoinColumn, ManyToOne } from "typeorm";
 import { BaseEntity } from "./_base.entity";
+import { FileEntity } from "./file.entity";
 
 @Entity("settings")
 export class SettingEntity extends BaseEntity {
@@ -10,11 +11,17 @@ export class SettingEntity extends BaseEntity {
   @Column({ name: "owner_name", type: "varchar", length: 255, default: "" })
   ownerName: string;
 
-  @Column({ type: "varchar", length: 255, default: "" })
-  tagline: string;
+  @Column({ name: "hero_title1", type: "varchar", length: 255, default: "" })
+  heroTitle1: string;
+
+  @Column({ name: "hero_title2", type: "varchar", length: 255, default: "" })
+  heroTitle2: string;
 
   @Column({ type: "text", default: "" })
   bio: string;
+
+  @Column({ name: "about_content", type: "text", default: "" })
+  aboutContent: string;
 
   @Column({ type: "varchar", length: 255, default: "" })
   email: string;
@@ -79,4 +86,11 @@ export class SettingEntity extends BaseEntity {
   // Section display order (comma-separated list of section keys)
   @Column({ name: "section_order", type: "varchar", length: 255, default: "hero,about,skills,projects,blog,contact" })
   sectionOrder: string;
+
+  @Column({ name: "profile_image_id", type: "int", nullable: true })
+  profileImageId: number | null;
+
+  @ManyToOne(() => FileEntity, { nullable: true, onDelete: "SET NULL", eager: false })
+  @JoinColumn({ name: "profile_image_id" })
+  profileImage: FileEntity | null;
 }

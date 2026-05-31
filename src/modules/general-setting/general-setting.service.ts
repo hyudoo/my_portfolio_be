@@ -13,7 +13,7 @@ export class GeneralSettingService {
   ) {}
 
   async get(locale: string) {
-    let setting = await this.settingRepo.findOne({ where: { locale } });
+    let setting = await this.settingRepo.findOne({ where: { locale }, relations: ["profileImage"] });
     if (!setting) {
       setting = this.settingRepo.create({ locale });
       await this.settingRepo.save(setting);
@@ -34,7 +34,7 @@ export class GeneralSettingService {
   }
 
   async publicGet(locale: string) {
-    let setting = await this.settingRepo.findOne({ where: { locale } });
+    let setting = await this.settingRepo.findOne({ where: { locale }, relations: ["profileImage"] });
     if (!setting) {
       setting = this.settingRepo.create({ locale });
       await this.settingRepo.save(setting);

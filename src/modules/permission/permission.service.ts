@@ -7,18 +7,12 @@ import { toSearchString } from "../../utils/to-search-string.util";
 
 @Injectable()
 export class PermissionService {
-  constructor(
-    @InjectRepository(PermissionEntity) private permissionRepo: Repository<PermissionEntity>,
-  ) {}
+  constructor(@InjectRepository(PermissionEntity) private permissionRepo: Repository<PermissionEntity>) {}
 
   async list(query: ListQuery) {
-    const { keyword, take, skip } = query;
+    const { keyword } = query;
 
-    const queryBuilder = this.permissionRepo
-      .createQueryBuilder("permission")
-      .addOrderBy("permission.action", "ASC")
-      .take(take)
-      .skip(skip);
+    const queryBuilder = this.permissionRepo.createQueryBuilder("permission").addOrderBy("permission.action", "ASC");
 
     if (keyword) {
       queryBuilder.andWhere("permission.action ILIKE :search", { search: toSearchString(keyword) });

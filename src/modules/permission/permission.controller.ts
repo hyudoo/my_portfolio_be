@@ -9,7 +9,7 @@ import { PermissionService } from "./permission.service";
 export class PermissionController {
   constructor(private service: PermissionService) {}
 
-  @RequiredPermissions("permission::read")
+  @RequiredPermissions("role::read")
   @Get("/")
   async list(@Query() query: ListQuery) {
     return this.service.list(query);

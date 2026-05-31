@@ -120,8 +120,6 @@ export class AuthService {
   }
 
   private async _comparePassword(password: string, hashed: string) {
-    console.log("---------------------------------");
-    console.log(password, hashed);
     return compare(password, hashed);
   }
 
