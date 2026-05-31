@@ -6,6 +6,7 @@ import { PermissionEntity } from "./entities/permission.entity";
 import { ProjectCategoryEntity } from "./entities/project-category.entity";
 import { ProjectEntity } from "./entities/project.entity";
 import { RoleEntity } from "./entities/role.entity";
+import { SettingEntity } from "./entities/setting.entity";
 import { SkillCategoryEntity } from "./entities/skill-category.entity";
 import { SkillEntity } from "./entities/skill.entity";
 import { UserEntity } from "./entities/user.entity";
@@ -24,4 +25,5 @@ export const entities = [
   ContactEntity,
   NotificationEntity,
   SubscriberEntity,
+  SettingEntity,
 ];

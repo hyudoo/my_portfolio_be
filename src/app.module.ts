@@ -1,6 +1,7 @@
 import { BullModule } from "@nestjs/bullmq";
 import { Module } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
+import { ScheduleModule } from "@nestjs/schedule";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { DataSource } from "typeorm";
 import { addTransactionalDataSource, deleteDataSourceByName } from "typeorm-transactional";
@@ -18,11 +19,15 @@ import { SkillCategoryModule } from "./modules/skill-category/skill-category.mod
 import { UserModule } from "./modules/user/user.module";
 import { redisOptions } from "./redis/redis.config";
 import { FileModule } from './modules/file/file.module';
+import { CronModule } from "./modules/cron/cron.module";
 import { SubscriberModule } from "./modules/subscriber/subscriber.module";
+import { GeneralSettingModule } from "./modules/general-setting/general-setting.module";
+import { PermissionModule } from "./modules/permission/permission.module";
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true, cache: true, envFilePath: ".env" }),
+    ScheduleModule.forRoot(),
     LoggerModule,
     TypeOrmModule.forRootAsync({
       useFactory: () => {
@@ -46,6 +51,9 @@ import { SubscriberModule } from "./modules/subscriber/subscriber.module";
     ContactModule,
     NotificationModule,
     SubscriberModule,
+    CronModule,
+    GeneralSettingModule,
+    PermissionModule,
   ],
 })
 export class AppModule {}

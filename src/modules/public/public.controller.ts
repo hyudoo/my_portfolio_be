@@ -5,6 +5,7 @@ import { ContactService } from "../contact/contact.service";
 import { CreateContactDto } from "../contact/dto/create-contact.dto";
 import { ProjectCategoryService } from "../project-category/project-category.service";
 import { ProjectService } from "../project-category/project/project.service";
+import { GeneralSettingService } from "../general-setting/general-setting.service";
 import { SkillCategoryService } from "../skill-category/skill-category.service";
 import { SubscribeDto } from "../subscriber/dto/subscribe.dto";
 import { TokenQuery } from "../subscriber/dto/token-query.dto";
@@ -20,21 +21,22 @@ export class PublicController {
     private projectService: ProjectService,
     private contactService: ContactService,
     private subscriberService: SubscriberService,
+    private generalSettingService: GeneralSettingService,
   ) {}
 
   @Get("/skills")
-  async listGroupedByCategory() {
-    return this.skillCategoryService.publicList();
+  async listGroupedByCategory(@Query("locale") locale?: string) {
+    return this.skillCategoryService.publicList(locale);
   }
 
   @Get("/project-categories")
-  async listProjectCategories() {
-    return this.projectCategoryService.publicList();
+  async listProjectCategories(@Query("locale") locale?: string) {
+    return this.projectCategoryService.publicList(locale);
   }
 
   @Get("/projects")
-  async listProjects() {
-    return this.projectService.publicList();
+  async listProjects(@Query("locale") locale?: string) {
+    return this.projectService.publicList(locale);
   }
 
   @Post("/contact")
@@ -55,5 +57,10 @@ export class PublicController {
   @Get("/unsubscribe")
   async unsubscribe(@Query() { token }: TokenQuery) {
     return this.subscriberService.unsubscribe(token);
+  }
+
+  @Get("/settings")
+  async getSettings(@Query("locale") locale: string = "vi") {
+    return this.generalSettingService.publicGet(locale);
   }
 }
