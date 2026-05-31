@@ -18,7 +18,7 @@ export class SkillCategoryService {
   constructor(@InjectRepository(SkillCategoryEntity) private skillCategoryRepo: Repository<SkillCategoryEntity>) {}
 
   async list(authUser: IAuthUser, query: ListQuery) {
-    const { keyword, take, skip } = query;
+    const { keyword, take, skip, locale } = query;
 
     const queryBuilder = this.skillCategoryRepo
       .createQueryBuilder("skillCategory")
@@ -28,6 +28,10 @@ export class SkillCategoryService {
 
     if (keyword) {
       queryBuilder.andWhere("skillCategory.name ILIKE :search", { search: toSearchString(keyword) });
+    }
+
+    if (locale) {
+      queryBuilder.andWhere("skillCategory.locale = :locale", { locale });
     }
 
     const [skillCategories, total] = await queryBuilder.getManyAndCount();
@@ -60,14 +64,18 @@ export class SkillCategoryService {
     await this.skillCategoryRepo.delete(body.ids);
   }
 
-  async publicList() {
-    const skillCategories = await this.skillCategoryRepo
+  async publicList(locale?: string) {
+    const queryBuilder = this.skillCategoryRepo
       .createQueryBuilder("skillCategory")
       .leftJoinAndSelect("skillCategory.skills", "skill")
       .addOrderBy("skillCategory.order", "ASC")
-      .addOrderBy("skill.order", "ASC")
-      .getMany();
+      .addOrderBy("skill.order", "ASC");
 
+    if (locale) {
+      queryBuilder.andWhere("skillCategory.locale = :locale", { locale });
+    }
+
+    const skillCategories = await queryBuilder.getMany();
     return { skillCategories };
   }
 }

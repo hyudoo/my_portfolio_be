@@ -11,6 +11,12 @@ export class ListQuery {
   @IsString()
   keyword?: string;
 
+  @ApiProperty({ required: false })
+  @IsUndefinable()
+  @Trim()
+  @IsString()
+  locale?: string;
+
   @ApiProperty({ required: false, type: "number" })
   @IsUndefinable()
   @Type(() => Number)

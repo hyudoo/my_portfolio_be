@@ -1,8 +1,14 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsInt, IsOptional, IsString, Length, Min } from "class-validator";
+import { IsOptional, IsString, Length } from "class-validator";
 import { Trim } from "../../../utils/decorators/trim.decorator";
 
 export class CreateSkillCategoryDto {
+  @ApiProperty({ type: "string" })
+  @Trim()
+  @IsString()
+  @Length(2, 10)
+  locale: string;
+
   @ApiProperty({ type: "string" })
   @Trim()
   @IsString()
@@ -16,9 +22,9 @@ export class CreateSkillCategoryDto {
   @Length(1, 100)
   icon?: string;
 
-  @ApiProperty({ required: false, type: "integer" })
+  @ApiProperty({ required: false, type: "string" })
   @IsOptional()
-  @IsInt()
-  @Min(0)
-  order?: number;
+  @IsString()
+  @Length(1, 255)
+  order?: string;
 }

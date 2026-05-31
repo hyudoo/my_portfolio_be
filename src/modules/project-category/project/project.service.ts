@@ -26,7 +26,7 @@ export class ProjectService {
   ) {}
 
   async list(authUser: IAuthUser, query: ListProjectQuery) {
-    const { keyword, take, skip, categoryId } = query;
+    const { keyword, take, skip, categoryId, locale } = query;
 
     const queryBuilder = this.projectRepo
       .createQueryBuilder("project")
@@ -43,6 +43,10 @@ export class ProjectService {
 
     if (categoryId) {
       queryBuilder.andWhere("category.id = :categoryId", { categoryId });
+    }
+
+    if (locale) {
+      queryBuilder.andWhere("project.locale = :locale", { locale });
     }
 
     const [projects, total] = await queryBuilder.getManyAndCount();
@@ -108,15 +112,19 @@ export class ProjectService {
     await this.projectRepo.delete(body.ids);
   }
 
-  async publicList() {
-    const projects = await this.projectRepo
+  async publicList(locale?: string) {
+    const queryBuilder = this.projectRepo
       .createQueryBuilder("project")
       .leftJoinAndSelect("project.categories", "category")
       .leftJoinAndSelect("project.skills", "skill")
       .leftJoinAndSelect("project.files", "file")
-      .addOrderBy("project.order", "ASC")
-      .getMany();
+      .addOrderBy("project.order", "ASC");
 
+    if (locale) {
+      queryBuilder.andWhere("project.locale = :locale", { locale });
+    }
+
+    const projects = await queryBuilder.getMany();
     return { projects };
   }
 }

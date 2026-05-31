@@ -22,7 +22,7 @@ export class SkillService {
   ) {}
 
   async list(authUser: IAuthUser, query: ListQuery) {
-    const { keyword, take, skip } = query;
+    const { keyword, take, skip, locale } = query;
 
     const queryBuilder = this.skillRepo
       .createQueryBuilder("skill")
@@ -33,6 +33,10 @@ export class SkillService {
 
     if (keyword) {
       queryBuilder.andWhere("skill.name ILIKE :search", { search: toSearchString(keyword) });
+    }
+
+    if (locale) {
+      queryBuilder.andWhere("skill.locale = :locale", { locale });
     }
 
     const [skills, total] = await queryBuilder.getManyAndCount();

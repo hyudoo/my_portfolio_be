@@ -20,7 +20,7 @@ export class ProjectCategoryService {
   ) {}
 
   async list(authUser: IAuthUser, query: ListQuery) {
-    const { keyword, take, skip } = query;
+    const { keyword, take, skip, locale } = query;
 
     const queryBuilder = this.projectCategoryRepo
       .createQueryBuilder("projectCategory")
@@ -30,6 +30,10 @@ export class ProjectCategoryService {
 
     if (keyword) {
       queryBuilder.andWhere("projectCategory.name ILIKE :search", { search: toSearchString(keyword) });
+    }
+
+    if (locale) {
+      queryBuilder.andWhere("projectCategory.locale = :locale", { locale });
     }
 
     const [projectCategories, total] = await queryBuilder.getManyAndCount();
@@ -62,12 +66,16 @@ export class ProjectCategoryService {
     await this.projectCategoryRepo.delete(body.ids);
   }
 
-  async publicList() {
-    const projectCategories = await this.projectCategoryRepo
+  async publicList(locale?: string) {
+    const queryBuilder = this.projectCategoryRepo
       .createQueryBuilder("projectCategory")
-      .addOrderBy("projectCategory.order", "ASC")
-      .getMany();
+      .addOrderBy("projectCategory.order", "ASC");
 
+    if (locale) {
+      queryBuilder.andWhere("projectCategory.locale = :locale", { locale });
+    }
+
+    const projectCategories = await queryBuilder.getMany();
     return { projectCategories };
   }
 }
