@@ -1,0 +1,16 @@
+stages:
+  - build
+
+main:
+  tags:
+    - main
+  stage: build
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"
+  script:
+    - cp ${ENV_FILE} .env
+    - set -a
+    - source .env
+    - set +a
+    - docker compose up -d --build app
+    - docker compose run --rm app yarn typeorm migration:run
